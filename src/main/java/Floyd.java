@@ -12,13 +12,13 @@ public class Floyd {
         this.n = g.size();
         dist = g.getAdjacencyMatrix();
         next = new int[n][n];
-
+//ASIGNAR NODS
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 next[i][j] = (dist[i][j] < Graph.INF && i != j) ? j : -1;
             }
         }
-
+        //RECORRIDO
         for (int k = 0; k < n; k++) {
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {

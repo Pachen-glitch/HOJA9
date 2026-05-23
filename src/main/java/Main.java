@@ -7,6 +7,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
+// Jorge Martinez y Enrique Bran
+// ES un grafo que conecta distintas ciudades y hace distintas consultas en el grafo, se despliegan en ventana las matrices para una mejor visualizacion
+// Hecho en Java
+//22/05/26
+
 public class Main {
 
     private static final String DATA_FILE = "guategrafo.txt";

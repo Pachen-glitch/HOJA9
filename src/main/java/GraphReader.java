@@ -22,7 +22,7 @@ public class GraphReader {
                 String city1 = parts[0];
                 String city2 = parts[1];
                 double km;
-                try {
+                try { //CONSULTAS AL GRAFO
                     km = Double.parseDouble(parts[2]);
                 } catch (NumberFormatException e) {
                     System.err.println("Línea " + lineNum + " ignorada (KM no numérico): " + line);
