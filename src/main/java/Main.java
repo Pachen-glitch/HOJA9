@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.List;
 
 public class Main {
 
@@ -32,7 +33,7 @@ public class Main {
             String option = scanner.nextLine().trim();
 
             switch (option) {
-                case "1" -> handleShortestPath(scanner, floyd);
+                case "1" -> handleShortestPath(scanner, floyd, graph);
                 case "2" -> handleCenter(floyd);
                 case "3" -> handleModify(scanner, graph, floyd);
                 case "4" -> handleAdjacencyMatrix(graph);
@@ -58,10 +59,18 @@ public class Main {
         System.out.print("  Seleccione una opción: ");
     }
 
-    private static void handleShortestPath(Scanner sc, Floyd floyd) {
-        System.out.print("Ciudad origen : ");
+    private static void handleShortestPath(Scanner sc, Floyd floyd, Graph graph) {
+        // Mostrar todas las ciudades disponibles separadas por comas
+        List<String> cities = graph.getVertices();
+        if (cities.isEmpty()) {
+            System.out.println("  No hay ciudades en el grafo.");
+        } else {
+            System.out.println("  Ciudades: " + String.join(", ", cities));
+        }
+
+        System.out.print("  Ciudad origen : ");
         String origin = sc.nextLine().trim();
-        System.out.print("1Ciudad destino: ");
+        System.out.print("  Ciudad destino: ");
         String dest = sc.nextLine().trim();
         System.out.println();
         System.out.println(floyd.getPathDescription(origin, dest));
@@ -88,6 +97,14 @@ public class Main {
         String choice = sc.nextLine().trim().toLowerCase();
 
         if (choice.equals("a")) {
+            // Mostrar todas las ciudades
+            List<String> cities = graph.getVertices();
+            if (cities.isEmpty()) {
+                System.out.println("  No hay ciudades en el grafo.");
+            } else {
+                System.out.println("  Ciudades: " + String.join(", ", cities));
+            }
+
             System.out.print("  Ciudad origen : ");
             String c1 = sc.nextLine().trim();
             System.out.print("  Ciudad destino: ");
