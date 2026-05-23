@@ -1,6 +1,11 @@
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
 
 public class Main {
 
@@ -37,7 +42,7 @@ public class Main {
                 case "2" -> handleCenter(floyd);
                 case "3" -> handleModify(scanner, graph, floyd);
                 case "4" -> handleAdjacencyMatrix(graph);
-                case "5" -> handleDistanceMatrix(floyd);
+                case "5" -> handleDistanceMatrix(floyd, graph);
                 case "6" -> {
                     System.out.println("Cerrando programa.");
                     running = false;
@@ -139,14 +144,98 @@ public class Main {
     }
 
     private static void handleAdjacencyMatrix(Graph graph) {
-        System.out.println("\n  Matriz de adyacencia:\n");
-        graph.printAdjacencyMatrix();
-        System.out.println();
+        // Construir datos de tabla para la matriz de adyacencia
+        int n = graph.size();
+        if (n == 0) {
+            JOptionPane.showMessageDialog(null, "No hay ciudades en el grafo.", "Matriz de adyacencia", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String[] columns = new String[n + 1];
+        columns[0] = "";
+        for (int j = 0; j < n; j++) columns[j + 1] = graph.getVertex(j);
+
+        double[][] mat = graph.getAdjacencyMatrix();
+        Object[][] data = new Object[n][n + 1];
+        for (int i = 0; i < n; i++) {
+            data[i][0] = graph.getVertex(i);
+            for (int j = 0; j < n; j++) {
+                data[i][j + 1] = (mat[i][j] >= Graph.INF) ? "INF" : String.valueOf((int) mat[i][j]);
+            }
+        }
+
+        // Depuración rápida: contar arcos finitos
+        int finite = 0;
+        for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) if (mat[i][j] < Graph.INF) finite++;
+        System.out.println("[DEBUG] Ciudades cargadas: " + n + ", arcos finitos: " + finite);
+
+        showMatrixWindow("Matriz de adyacencia", columns, data);
     }
 
-    private static void handleDistanceMatrix(Floyd floyd) {
-        System.out.println("\n  Matriz APSP (distancias mínimas):\n");
-        floyd.printDistanceMatrix();
-        System.out.println();
+    private static void handleDistanceMatrix(Floyd floyd, Graph graph) {
+        // Construir datos de tabla para la matriz de distancias mínimas
+        int n = graph.size();
+        if (n == 0) {
+            JOptionPane.showMessageDialog(null, "No hay ciudades en el grafo.", "Matriz APSP", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String[] columns = new String[n + 1];
+        columns[0] = "";
+        for (int j = 0; j < n; j++) columns[j + 1] = graph.getVertex(j);
+
+        Object[][] data = new Object[n][n + 1];
+        for (int i = 0; i < n; i++) {
+            data[i][0] = graph.getVertex(i);
+            for (int j = 0; j < n; j++) {
+                double d = floyd.getDistance(i, j);
+                data[i][j + 1] = (d >= Graph.INF) ? "INF" : String.valueOf((int) d);
+            }
+        }
+
+        // Depuración rápida: contar pares con distancia finita
+        int finite2 = 0;
+        for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) if (floyd.getDistance(i, j) < Graph.INF) finite2++;
+        System.out.println("[DEBUG] Matriz APSP: ciudades=" + n + ", entradas finitas=" + finite2);
+
+        showMatrixWindow("Matriz APSP (distancias mínimas)", columns, data);
+    }
+
+    private static void showMatrixWindow(String title, String[] columns, Object[][] data) {
+        SwingUtilities.invokeLater(() -> {
+            DefaultTableModel model = new DefaultTableModel(data, columns) {
+                @Override
+                public boolean isCellEditable(int row, int column) { return false; }
+            };
+            JTable table = new JTable(model);
+            table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+            // Centrar contenido
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+            table.setDefaultRenderer(Object.class, centerRenderer);
+
+            // Ajustar anchos de columna según contenido
+            for (int col = 0; col < table.getColumnCount(); col++) {
+                int maxWidth = 50; // mínimo
+                TableCellRenderer headerR = table.getTableHeader().getDefaultRenderer();
+                Component hc = headerR.getTableCellRendererComponent(table, table.getColumnName(col), false, false, 0, col);
+                maxWidth = Math.max(maxWidth, hc.getPreferredSize().width + 10);
+                for (int row = 0; row < table.getRowCount(); row++) {
+                    TableCellRenderer cellR = table.getCellRenderer(row, col);
+                    Component c = cellR.getTableCellRendererComponent(table, table.getValueAt(row, col), false, false, row, col);
+                    maxWidth = Math.max(maxWidth, c.getPreferredSize().width + 10);
+                }
+                table.getColumnModel().getColumn(col).setPreferredWidth(maxWidth);
+            }
+
+            JScrollPane scroll = new JScrollPane(table);
+            JFrame frame = new JFrame(title);
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.getContentPane().add(scroll, BorderLayout.CENTER);
+            frame.setSize(new Dimension(900, 600));
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
     }
 }
